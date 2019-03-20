@@ -4,8 +4,8 @@ from builtins import range, input
 # sudo pip install -U future
 
 from keras.models import Model
-from keras.applications.resnet50 import ResNet50, preprocess_input, decode_predictions
-#from keras.applications.vgg16 import VGG16, preprocess_input, decode_predictions
+#from keras.applications.resnet50 import ResNet50, preprocess_input, decode_predictions
+from keras.applications.vgg16 import VGG16, preprocess_input, decode_predictions
 from keras.preprocessing import image
 
 import numpy as np
@@ -46,8 +46,8 @@ def getMap(img):
   return camz, classnames
 
 # add preprocessing layer to the front of VGG
-resnet = ResNet50(input_shape=(224, 224, 3), weights='imagenet', include_top=True)
-#resnet = VGG16(input_shape=(224, 224, 3), weights='imagenet', include_top=True)
+#resnet = ResNet50(input_shape=(224, 224, 3), weights='imagenet', include_top=True)
+resnet = VGG16(input_shape=(224, 224, 3), weights='imagenet', include_top=True)
 
 # make a model to get output before flatten
 activation_layer = resnet.get_layer('activation_49')
