@@ -14,6 +14,8 @@
 
 ## Image segmentation:
 
+<img src="image_segmentation/images/unet.png" width=800>	
+	
 ### example:
 	https://www.depends-on-the-definition.com/unet-keras-segmenting-images/
 	
@@ -22,8 +24,6 @@
 	https://bdd-data.berkeley.edu/
 	https://www.cityscapes-dataset.com/
 	http://cocodataset.org
-	
-<img src="image_segmentation/images/unet.png" width=800>	
 	
 ## SSD:
 	
