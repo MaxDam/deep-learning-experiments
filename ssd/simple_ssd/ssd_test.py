@@ -34,7 +34,7 @@ files = ('fish-bike.jpg', 'cat.jpg', 'boys.jpg', 'car_cat.jpg', 'car_cat2.jpg')
 inputs = []
 images = []
 for f in files:
-    f = "./pics/{}".format(f)
+    f = "./images/{}".format(f)
     img = image.load_img(""+f, target_size=(300, 300))
     img = image.img_to_array(img)
     
