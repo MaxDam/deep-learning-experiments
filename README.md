@@ -23,4 +23,6 @@
 	https://www.cityscapes-dataset.com/
 	http://cocodataset.org
 	
+## SSD:
 	
+	Weights are ported from the original models and are available [here](https://mega.nz/#F!7RowVLCL!q3cEVRK9jyOSB9el3SssIA). You need `weights_SSD300.hdf5`.
