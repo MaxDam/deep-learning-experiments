@@ -8,4 +8,4 @@ Weights are ported from the original models and are available [here](https://meg
 
 <img src="./images/model.png" width=800>
 
-<img src="./images/ssd300.png" width=800>
+<img src="./images/ssd300.jpg" width=800>
