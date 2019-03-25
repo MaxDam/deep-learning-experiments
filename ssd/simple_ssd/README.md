@@ -5,3 +5,7 @@ Weights are ported from the original models and are available [here](https://meg
 <img src="./images/ssd_schema_1.png" width=800>
 	
 <img src="./images/ssd_schema_2.png" width=800>
+
+<img src="./images/model.png" width=800>
+
+<img src="./images/ssd300.png" width=800>
