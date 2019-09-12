@@ -2,17 +2,17 @@ import cv2
 import time
 
 video_capture = cv2.VideoCapture(0)
-video_capture.set(3, 640) 
-video_capture.set(4, 480) 
+video_capture.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
+video_capture.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
 
 while True:
     sleep_time = 0.02
     
-    video_capture.set(15, 0)
+    video_capture.set(cv2.CAP_PROP_EXPOSURE, 0)
     time.sleep(sleep_time)
     retChiaro, frameChiaro = video_capture.read()
     
-    video_capture.set(15, -8.0)
+    video_capture.set(cv2.CAP_PROP_EXPOSURE, -8.0)
     time.sleep(sleep_time)
     retScuro, frameScuro = video_capture.read()
     
