@@ -20,8 +20,8 @@ from sklearn.utils import shuffle
 #%matplotlib inline
 
 batch_size=32
-epochs=1
-lr=0.001
+epochs=10
+lr=0.0001
 
 #autoencoder
 input_dim = 4
@@ -34,7 +34,7 @@ encoderLayer = Dense(hidden_dim, activation="relu")(inputLayer)
 encoderLayer = Dense(encoding_dim, activation="relu")(encoderLayer)
 decoderLayer = Dense(hidden_dim, activation='relu')(encoderLayer)
 #decoderLayer = Dropout(dropout)(decoderLayer)
-decoderLayer = Dense(input_dim, activation='sigmoid')(decoderLayer)
+decoderLayer = Dense(input_dim, activation='linear')(decoderLayer)
 model = Model(inputs=inputLayer, outputs=decoderLayer)
 optimizer = Adam(lr=lr)
 model.compile(optimizer=optimizer, loss='mean_squared_error', metrics=['accuracy'])
