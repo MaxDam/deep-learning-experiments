@@ -1,1 +1,3 @@
 http://posefs1.perception.cs.cmu.edu/OpenPose/models/pose/coco/pose_iter_440000.caffemodel
+
+https://www.dropbox.com/home/openpose?preview=pose_iter_440000.caffemodel
