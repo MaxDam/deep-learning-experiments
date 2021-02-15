@@ -3,7 +3,7 @@
 import cv2
 import subprocess as sp
 
-rtsp_server = 'rtsp://example.org:554/...' # push server (output server)
+rtsp_server = 'rtsp://localhost:8554/mystream'
     
 cap = cv2.VideoCapture(0)
 sizeStr = str(int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))) + 'x' + str(int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT)))
