@@ -19,6 +19,12 @@ def on_message(client, userdata, msg):
 	npimg = np.frombuffer(img, dtype=np.uint8)
 	frameDetail = cv.imdecode(npimg, 1)
 	
+def overlayImage(frm, frmDetail):
+	x_offset=50
+	y_offset=50
+	frame[y_offset:y_offset+frmDetail.shape[0], x_offset:frmDetail+s_img.shape[1]] = frmDetail
+	return frame
+	
 frameDetail = np.zeros((240, 320, 3), np.uint8)
 client = mqtt.Client()
 client.on_connect = on_connect
@@ -27,15 +33,17 @@ client.connect(MQTT_BROKER, 1883)
 client.loop_start()
 
 cap = cv.VideoCapture(RTSP_STREAM)
-
+	
 while(cap.isOpened()):
 	ret, frame = cap.read()
-	#frameOut = frame.copy()
-	#frame[100:340,100:420,:] = frameDetail[0:240,0:320,:]
+	frame = overlayImage(frame, frameDetail)
+	
 	cv.imshow('Frame', frame)
-	cv.imshow('FrameDetail', frameDetail)
+	#cv.imshow('FrameDetail', frameDetail)
+	
 	if cv.waitKey(20) & 0xFF == ord('q'):
 		break
+		
 cap.release()
 cv.destroyAllWindows()
 client.loop_stop()
