@@ -20,9 +20,9 @@ def on_message(client, userdata, msg):
 	frameDetail = cv.imdecode(npimg, 1)
 	
 def overlayImage(frm, frmDetail):
-	x_offset=50
-	y_offset=50
-	frame[y_offset:y_offset+frmDetail.shape[0], x_offset:frmDetail+s_img.shape[1]] = frmDetail
+	x_offset=30
+	y_offset=30
+	frame[y_offset:y_offset+frmDetail.shape[0], x_offset:x_offset+frmDetail.shape[1]] = frmDetail
 	return frame
 	
 frameDetail = np.zeros((240, 320, 3), np.uint8)
