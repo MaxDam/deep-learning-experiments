@@ -4,7 +4,8 @@ import cv2 as cv
 import paho.mqtt.client as mqtt
 import base64
 import numpy as np
-import tensorflow as tf
+#from tflite_runtime.interpreter import Interpreter
+from tensorflow.lite.python.interpreter import Interpreter
 #print(tf.__version__)
 
 RTSP_STREAM = "rtsp://localhost:8554/mystream"
@@ -19,30 +20,37 @@ else:
 mqtt_client = mqtt.Client()
 mqtt_client.connect(MQTT_BROKER, 1883)
 
-interpreter = tf.lite.Interpreter(model_path="model/face_detection_front.tflite")
+#interpreter = Interpreter(model_path="model/FaceMobileNet_Float32.tflite")
+interpreter = Interpreter(model_path="model/ssd_mobilenet_v1_1_metadata_1.tflite")
 interpreter.allocate_tensors()
 input_details = interpreter.get_input_details()
+height = input_details[0]['shape'][1]
+width = input_details[0]['shape'][2]
 output_details = interpreter.get_output_details()
 acquire_in_progress = False
 
 def detect_and_send_face(acquiredFrame):
-	#(height, width) = acquiredFrame.shape[:2]
-	acquiredFrame = cv.resize(acquiredFrame, (128, 128))
-	input_data = np.array(acquiredFrame, dtype=np.float32)
+	#acquiredFrame = cv.resize(acquiredFrame, (112, 112))
+	#input_data = np.array(acquiredFrame, dtype=np.float32)
+	acquiredFrame = cv.resize(acquiredFrame, (300, 300))
+	input_data = np.array(acquiredFrame, dtype=np.uint8)
 	interpreter.set_tensor(input_details[0]['index'], [input_data])
 	interpreter.invoke()
-	print(output_details)
-	rects = interpreter.get_tensor(output_details[0]['index'])
-	scores = interpreter.get_tensor(output_details[2]['index'])
-	for index, score in enumerate(scores[0]):
+	#print(output_details)
+	boxes   = interpreter.get_tensor(output_details[0]['index'])[0]
+	classes = interpreter.get_tensor(output_details[1]['index'])[0]
+	scores  = interpreter.get_tensor(output_details[2]['index'])[0]
+	#print(scores)
+	for index, score in enumerate(scores):
 		if score > 0.5:
-			box = rects[0][index]
-			y_min = int(max(1, (box[0] * acquiredFrame.height)))
-			x_min = int(max(1, (box[1] * acquiredFrame.width)))
-			y_max = int(min(acquiredFrame.height, (box[2] * acquiredFrame.height)))
-			x_max = int(min(acquiredFrame.width, (box[3] * acquiredFrame.width)))
+			box = boxes[index]
+			print(box)
+			ymin = int(max(1, (box[0] * height)))
+			xmin = int(max(1, (box[1] * width)))
+			ymax = int(min(height, (box[2] * height)))
+			xmax = int(min(width, (box[3] * width)))
 			if DEBUG:
-				cv.rectangle(acquiredFrame, (x_min, y_min), (x_max, y_max), (255, 255, 255), 2)
+				cv.rectangle(acquiredFrame, (xmin,ymin), (xmax,ymax), (10, 255, 0), 2)
 				cv.imshow('frame', acquiredFrame)
 			else:
 				roi_color = acquiredFrame[y_min:y_max, x_min:x_max] 
