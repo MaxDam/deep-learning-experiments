@@ -31,6 +31,7 @@ def detect_and_send_face(acquiredFrame):
 	input_data = np.array(acquiredFrame, dtype=np.float32)
 	interpreter.set_tensor(input_details[0]['index'], [input_data])
 	interpreter.invoke()
+	print(output_details)
 	rects = interpreter.get_tensor(output_details[0]['index'])
 	scores = interpreter.get_tensor(output_details[2]['index'])
 	for index, score in enumerate(scores[0]):
