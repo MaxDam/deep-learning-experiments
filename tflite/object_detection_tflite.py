@@ -16,7 +16,7 @@ import tensorflow as tf
 import tflite_runtime.interpreter as tflite
 import os
 
-RTSP_STREAM = "rtsp://admincamera:adminpwd@192.168.1.7:554/stream1"
+RTSP_STREAM = "rtsp://admincamera:adminpwd@192.168.1.14:554/stream1"
 MODEL_PATH  = "ssd_mobilenet_v1_1_metadata_1.tflite"
 DELEGATE_LINUX = 'libedgetpu.so.1'
 DELEGATE_MAC = 'libedgetpu.1.dylib'
@@ -55,19 +55,25 @@ frame_height = 0
 busy = False
 classes = []
 scores  = []
+boxes   = []
+indices = []
 numDetections = 0
-boxes_out = []
-indices   = []
 	
 def detect(acquiredFrame):
-	global classes, scores, count, boxes_out, indices, conf_threshold, nms_threshold
+	global classes, scores, count, boxes, indices, conf_threshold, nms_threshold
+	
+	#prepara l'input trasformandolo a 8 bit
 	input_frame = cv.resize(acquiredFrame, (300, 300))
 	#input_data = np.array(input_frame, dtype=np.uint8)
 	input_data = np.array(input_frame).astype('uint8')
 	interpreter.set_tensor(input_details[0]['index'], [input_data])
+	
+	#effettua la predizione
 	interpreter.invoke()
 	#print(input_details)
 	#print(output_details)
+	
+	#ottiene i risultati
 	boxes   = interpreter.get_tensor(output_details[0]['index'])[0]
 	classes = interpreter.get_tensor(output_details[1]['index'])[0]
 	scores  = interpreter.get_tensor(output_details[2]['index'])[0]
@@ -76,6 +82,8 @@ def detect(acquiredFrame):
 	#print("classes: ", classes)
 	#print("scores: ",  scores)
 	#print("numDetections: ",  numDetections)
+	
+	#trasforma i boxes (xmin, xmax, ymin, ymax -> xmin, ymin, width, height)
 	boxes_out = []
 	for index, score in enumerate(scores):
 		y_min = int(max(1, (boxes[index][0] * frame_height)))
@@ -85,12 +93,13 @@ def detect(acquiredFrame):
 		w = x_max - x_min
 		h = y_max - y_min
 		boxes_out.append([x_min, y_min, w, h])
-		#indices.append([index])
+	boxes = boxes_out
 	
-	indices = cv.dnn.NMSBoxes(boxes_out, scores, conf_threshold, nms_threshold)
+	#chiama la Non-maximum Suppression ottenendo gli indici univoci
+	indices = cv.dnn.NMSBoxes(boxes, scores, conf_threshold, nms_threshold)
 	#print("indices: ",  indices)
 
-	                	                
+#disegna il box e la classe predetta	                
 def draw_bounding_box(img, class_id, confidence, x, y, w, h):
 	global label_names, label_colors
 	class_id = int(class_id)
@@ -102,70 +111,40 @@ def draw_bounding_box(img, class_id, confidence, x, y, w, h):
 	color = label_colors[class_id]
 	cv.rectangle(img, (x, y), (x_plus_w, y_plus_h), color, 2)
 	cv.putText(img, label, (x - 10, y - 10), cv.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
-    
+
+#scorre i frames acquisiti dalla camera
 while(cap.isOpened()):
+	#ottiene il singolo frame e le sue dimensioni
 	ret, frame = cap.read()
 	if not ret: continue
 	frame_width  = frame.shape[1]
 	frame_height = frame.shape[0]
 
+	#effettua la predizione
 	if not busy:
 		busy = True
 		detect(frame)
 		busy = False
 
+	#scorre gli indici e per ogni elemento stampa il box
 	for i in indices:
 		i = i[0]
-		x, y, w, h = boxes_out[i]
-		#print("box", boxes_out[i])
-		draw_bounding_box(frame, classes[i], scores[i], x, y, w, h)
+		x, y, w, h = boxes[i]
+		class_id = classes[i]
+		confidence = scores[i]
+		draw_bounding_box(frame, class_id, confidence, x, y, w, h)
 
+	#mostra il frame
 	cv.imshow('frame', frame)
 	
+	#si blocca se viene premuto il tasto 'q'
 	if cv.waitKey(20) & 0xFF == ord('q'):
 		break
-		
+
+#rilascia gli oggetti		
 cap.release()
 cv.destroyAllWindows()
 
-
-
-#def run(frame):
-#    Width = frame.shape[1]
-#    Height = frame.shape[0]
-#    blob = cv2.dnn.blobFromImage(frame, scale, (416,416), (0,0,0), True, crop=False)
-#    net.setInput(blob)
-#    outs = net.forward(get_output_layers(net))
-#    class_ids = []
-#    confidences = []
-#    boxes = []
-#    conf_threshold = 0.5
-#    nms_threshold = 0.4
-#    for out in outs:
-#        for detection in out:
-#            scores = detection[5:]
-#            class_id = np.argmax(scores)
-#            confidence = scores[class_id]
-#            if confidence > 0.5:
-#                center_x = int(detection[0] * Width)
-#                center_y = int(detection[1] * Height)
-#                w = int(detection[2] * Width)
-#                h = int(detection[3] * Height)
-#                x = center_x - w / 2
-#                y = center_y - h / 2
-#                class_ids.append(class_id)
-#                confidences.append(float(confidence))
-#                boxes.append([x, y, w, h])
-#    indices = cv2.dnn.NMSBoxes(boxes, confidences, conf_threshold, nms_threshold)
-#    for i in indices:
-#        i = i[0]
-#        box = boxes[i]
-#        x = box[0]
-#        y = box[1]
-#        w = box[2]
-#        h = box[3]
-#        draw_bounding_box(frame, class_ids[i], confidences[i], round(x), round(y), round(x + w), round(y + h))
-#    return frame
 
 #esempio di output:
 #input: [{'name': 'normalized_input_image_tensor', 'index': 175, 'shape': array([  1, 300, 300,   3], dtype=int32), 'shape_signature': array([  1, 300, 300,   3], dtype=int32), 'dtype': <class 'numpy.uint8'>, 'quantization': (0.0078125, 128), 'quantization_parameters': {'scales': array([0.0078125], dtype=float32), 'zero_points': array([128], dtype=int32), 'quantized_dimension': 0}, 'sparsity_parameters': {}}]
