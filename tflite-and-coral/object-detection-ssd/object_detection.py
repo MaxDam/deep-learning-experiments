@@ -41,8 +41,7 @@ conf_threshold = 0.5
 nms_threshold = 0.4
 	
 if USE_CORAL:
-	interpreter = tflite.Interpreter(model_path=MODEL_PATH_EDGETPU)
-	interpreter = tflite.Interpreter(model_path, experimental_delegates=[tflite.load_delegate(DELEGATE)])
+	interpreter = tflite.Interpreter(model_path=MODEL_PATH_EDGETPU, experimental_delegates=[tflite.load_delegate(DELEGATE)])
 else:
 	interpreter = tf.lite.Interpreter(model_path=MODEL_PATH)
 
@@ -62,7 +61,7 @@ indices = []
 numDetections = 0
 	
 def detect(acquiredFrame):
-	global classes, scores, count, boxes, indices, conf_threshold, nms_threshold
+	global classes, scores, numDetections, boxes, indices, conf_threshold, nms_threshold
 	
 	#prepara l'input trasformandolo a 8 bit
 	input_frame = cv.resize(acquiredFrame, (300, 300))

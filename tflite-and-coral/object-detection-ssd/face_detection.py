@@ -19,7 +19,6 @@ import os
 RTSP_STREAM = "rtsp://admincamera:adminpwd@192.168.1.14:554/stream1"
 MODEL_PATH  = "model/ssd_mobilenet_v2_face_quant_postprocess.tflite"
 MODEL_PATH_EDGETPU  = "model/ssd_mobilenet_v2_face_quant_postprocess_edgetpu.tflite"
-LABELS_PATH = "model/coco_labels.txt"
 DELEGATE_LINUX = 'libedgetpu.so.1'
 DELEGATE_MAC = 'libedgetpu.1.dylib'
 DELEGATE_WINDOSS = 'edgetpu.dll'
@@ -34,12 +33,11 @@ if USE_RTSP:
 else:
 	cap = cv.VideoCapture(0)
 
-conf_threshold = 0.5
+conf_threshold = 0.4
 nms_threshold = 0.4
 	
 if USE_CORAL:
-	interpreter = tflite.Interpreter(model_path=MODEL_PATH_EDGETPU)
-	interpreter = tflite.Interpreter(model_path, experimental_delegates=[tflite.load_delegate(DELEGATE)])
+	interpreter = tflite.Interpreter(model_path=MODEL_PATH_EDGETPU, experimental_delegates=[tflite.load_delegate(DELEGATE)])
 else:
 	interpreter = tf.lite.Interpreter(model_path=MODEL_PATH)
 
@@ -52,14 +50,13 @@ output_details = interpreter.get_output_details()
 frame_width  = 0
 frame_height = 0
 busy = False
-classes = []
 scores  = []
 boxes   = []
 indices = []
 numDetections = 0
 	
 def detect(acquiredFrame):
-	global classes, scores, count, boxes, indices, conf_threshold, nms_threshold
+	global scores, numDetections, boxes, indices, conf_threshold, nms_threshold
 	
 	#prepara l'input trasformandolo a 8 bit
 	input_frame = cv.resize(acquiredFrame, (320, 320))
@@ -99,7 +96,6 @@ def detect(acquiredFrame):
 
 #disegna il box e la classe predetta	                
 def draw_bounding_box(img, label, confidence, x, y, w, h):
-	global label_names, label_colors
 	x = round(x)
 	y = round(y)
 	x_plus_w = round(x + w)
@@ -127,6 +123,7 @@ while(cap.isOpened()):
 	for i in indices:
 		i = i[0]
 		x, y, w, h = boxes[i]
+		#print(boxes[i])
 		confidence = scores[i]
 		draw_bounding_box(frame, "", confidence, x, y, w, h)
 
