@@ -34,9 +34,6 @@ if USE_RTSP:
 else:
 	cap = cv.VideoCapture(0)
 
-label_names = [line.rstrip('\n') for line in open(LABELS_PATH)]
-label_names = np.array(label_names)
-label_colors = np.random.uniform(0, 255, size=(len(label_names), 3))
 conf_threshold = 0.5
 nms_threshold = 0.4
 	
@@ -65,25 +62,24 @@ def detect(acquiredFrame):
 	global classes, scores, count, boxes, indices, conf_threshold, nms_threshold
 	
 	#prepara l'input trasformandolo a 8 bit
-	input_frame = cv.resize(acquiredFrame, (300, 300))
-	#input_data = np.array(input_frame, dtype=np.uint8)
+	input_frame = cv.resize(acquiredFrame, (320, 320))
 	input_data = np.array(input_frame).astype('uint8')
 	interpreter.set_tensor(input_details[0]['index'], [input_data])
 	
 	#effettua la predizione
 	interpreter.invoke()
-	print(input_details)
-	print(output_details)
+	#print(input_details)
+	#print(output_details)
 	
 	#ottiene i risultati
 	boxes   = interpreter.get_tensor(output_details[0]['index'])[0]
 	classes = interpreter.get_tensor(output_details[1]['index'])[0]
 	scores  = interpreter.get_tensor(output_details[2]['index'])[0]
 	numDetections = int(interpreter.get_tensor(output_details[3]['index'])[0])
-	print("boxes: ",   boxes)
-	print("classes: ", classes)
-	print("scores: ",  scores)
-	print("numDetections: ",  numDetections)
+	#print("boxes: ",   boxes)
+	#print("classes: ", classes)
+	#print("scores: ",  scores)
+	#print("numDetections: ",  numDetections)
 	
 	#trasforma i boxes (xmin, xmax, ymin, ymax -> xmin, ymin, width, height)
 	boxes_out = []
@@ -102,17 +98,16 @@ def detect(acquiredFrame):
 	#print("indices: ",  indices)
 
 #disegna il box e la classe predetta	                
-def draw_bounding_box(img, class_id, confidence, x, y, w, h):
+def draw_bounding_box(img, label, confidence, x, y, w, h):
 	global label_names, label_colors
-	class_id = int(class_id)
 	x = round(x)
 	y = round(y)
 	x_plus_w = round(x + w)
 	y_plus_h = round(y + h)
-	label = str(label_names[class_id])
-	color = label_colors[class_id]
+	color = (0,255,255)
 	cv.rectangle(img, (x, y), (x_plus_w, y_plus_h), color, 2)
-	cv.putText(img, label, (x - 10, y - 10), cv.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
+	if label != "":
+		cv.putText(img, label, (x - 10, y - 10), cv.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
 
 #scorre i frames acquisiti dalla camera
 while(cap.isOpened()):
@@ -132,9 +127,8 @@ while(cap.isOpened()):
 	for i in indices:
 		i = i[0]
 		x, y, w, h = boxes[i]
-		class_id = classes[i]
 		confidence = scores[i]
-		draw_bounding_box(frame, class_id, confidence, x, y, w, h)
+		draw_bounding_box(frame, "", confidence, x, y, w, h)
 
 	#mostra il frame
 	cv.imshow('frame', frame)
