@@ -17,22 +17,28 @@ import tflite_runtime.interpreter as tflite
 import os
 
 RTSP_STREAM = "rtsp://admincamera:adminpwd@192.168.1.14:554/stream1"
-MODEL_PATH  = "model/ssd_mobilenet_v2_coco_quant_no_nms.tflite"
-MODEL_PATH_EDGETPU  = "model/ssd_mobilenet_v2_coco_quant_no_nms_edgetpu.tflite"
+MODEL_PATH  = "model/ssd_mobilenet_v1_1_metadata_1.tflite" #"model/ssd_mobilenet_v2_coco_quant_no_nms.tflite"
+MODEL_PATH_EDGETPU  = "model/ssd_mobilenet_v1_coco_quant_postprocess_edgetpu.tflite" #"model/ssd_mobilenet_v2_coco_quant_no_nms_edgetpu.tflite"
 LABELS_PATH = "model/coco_labels.txt"
 DELEGATE_LINUX = 'libedgetpu.so.1'
 DELEGATE_MAC = 'libedgetpu.1.dylib'
 DELEGATE_WINDOSS = 'edgetpu.dll'
+
 DELEGATE = DELEGATE_MAC
 USE_CORAL = False
 USE_RTSP = False
+USE_VIDEO_DEMO = True
 
-if USE_RTSP:
+
+if USE_VIDEO_DEMO:
+	cap = cv.VideoCapture("video/Office-Parkour.mp4")
+elif USE_RTSP:
 	os.environ["OPENCV_FFMPEG_CAPTURE_OPTIONS"] = "rtsp_transport;udp"
 	cap = cv.VideoCapture(RTSP_STREAM, cv.CAP_FFMPEG)
 	cap.set(cv.CAP_PROP_BUFFERSIZE, 2)
 else:
 	cap = cv.VideoCapture(0)
+	
 
 label_names = [line.rstrip('\n') for line in open(LABELS_PATH)]
 label_names = np.array(label_names)
@@ -109,6 +115,7 @@ def draw_bounding_box(img, class_id, confidence, x, y, w, h):
 	x_plus_w = round(x + w)
 	y_plus_h = round(y + h)
 	label = str(label_names[class_id])
+	label = "{} {:.0f}%".format(label, int(confidence*100))
 	color = label_colors[class_id]
 	cv.rectangle(img, (x, y), (x_plus_w, y_plus_h), color, 2)
 	cv.putText(img, label, (x - 10, y - 10), cv.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)

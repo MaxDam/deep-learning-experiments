@@ -22,9 +22,11 @@ MODEL_PATH_EDGETPU  = "model/ssd_mobilenet_v2_face_quant_postprocess_edgetpu.tfl
 DELEGATE_LINUX = 'libedgetpu.so.1'
 DELEGATE_MAC = 'libedgetpu.1.dylib'
 DELEGATE_WINDOSS = 'edgetpu.dll'
+
 DELEGATE = DELEGATE_MAC
 USE_CORAL = False
 USE_RTSP = False
+
 
 if USE_RTSP:
 	os.environ["OPENCV_FFMPEG_CAPTURE_OPTIONS"] = "rtsp_transport;udp"
@@ -33,7 +35,7 @@ if USE_RTSP:
 else:
 	cap = cv.VideoCapture(0)
 
-conf_threshold = 0.4
+conf_threshold = 0.5
 nms_threshold = 0.4
 	
 if USE_CORAL:
