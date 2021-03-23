@@ -17,8 +17,8 @@ import tflite_runtime.interpreter as tflite
 import os
 
 RTSP_STREAM = "rtsp://admincamera:adminpwd@192.168.1.14:554/stream1"
-MODEL_PATH  = "model/ssd_mobilenet_v1_1_metadata_1.tflite" #"model/ssd_mobilenet_v2_coco_quant_no_nms.tflite"
-MODEL_PATH_EDGETPU  = "model/ssd_mobilenet_v1_coco_quant_postprocess_edgetpu.tflite" #"model/ssd_mobilenet_v2_coco_quant_no_nms_edgetpu.tflite"
+MODEL_PATH  = "model/ssd_mobilenet_v1_1_metadata_1.tflite"
+MODEL_PATH_EDGETPU  = "model/ssd_mobilenet_v1_coco_quant_postprocess_edgetpu.tflite"
 LABELS_PATH = "model/coco_labels.txt"
 DELEGATE_LINUX = 'libedgetpu.so.1'
 DELEGATE_MAC = 'libedgetpu.1.dylib'
